@@ -1,4 +1,4 @@
-#include "application.h"
+#include "core/application.h"
 
 #include <assert.h>
 #include <freertos/FreeRTOS.h>
