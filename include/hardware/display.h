@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-#include <esp_lcd_panel_io.h>
-
 namespace hardware
 {
     class display
@@ -38,9 +36,7 @@ namespace hardware
 
         display();
 
-        esp_lcd_i80_bus_handle_t m_bus_handle = nullptr;
-        esp_lcd_panel_io_handle_t m_io_handle = nullptr;
-        esp_lcd_panel_handle_t m_panel_handle = nullptr;
+        void *mp_implementation = nullptr;
 
         transfer_done_callback_t m_on_transfer_done_callback = nullptr;
         void *m_on_transfer_done_user_data = nullptr;

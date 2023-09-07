@@ -2,7 +2,7 @@
 
 // #include <Arduino.h>
 
-#include "hardware/config.h"
+#include "config.h"
 
 namespace hardware
 {

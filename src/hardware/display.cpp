@@ -1,25 +1,35 @@
 #include "hardware/display.h"
 
+#include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
 // #include <Arduino.h>
 
-#include "hardware/config.h"
+#include "config.h"
 
 #define LCD_PIXELS_WIDTH 320
 #define LCD_PIXELS_HEIGHT 170
 
 namespace hardware
 {
+    struct display_implementation
+    {
+        esp_lcd_i80_bus_handle_t bus_handle = nullptr;
+        esp_lcd_panel_io_handle_t io_handle = nullptr;
+        esp_lcd_panel_handle_t panel_handle = nullptr;
+    };
+
     display display::s_instance;
 
-    display::display()
+    display::display() : mp_implementation(static_cast<void *>(new display_implementation()))
     {
         // pinMode(PIN_LCD_POWER, OUTPUT);
         // digitalWrite(PIN_LCD_POWER, HIGH);
 
         // pinMode(PIN_LCD_RD, OUTPUT);
         // digitalWrite(PIN_LCD_RD, HIGH);
+
+        auto implementation = static_cast<display_implementation *>(mp_implementation);
 
         esp_lcd_i80_bus_config_t bus_config = {
             .dc_gpio_num = PIN_LCD_DC,
@@ -40,7 +50,7 @@ namespace hardware
             .max_transfer_bytes = LCD_PIXELS_WIDTH * LCD_PIXELS_HEIGHT * sizeof(uint16_t),
         };
 
-        ESP_ERROR_CHECK(esp_lcd_new_i80_bus(&bus_config, &m_bus_handle));
+        ESP_ERROR_CHECK(esp_lcd_new_i80_bus(&bus_config, &(implementation->bus_handle)));
 
         auto on_transfer_done = [](esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
         {
@@ -67,7 +77,7 @@ namespace hardware
             },
         };
 
-        ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(m_bus_handle, &io_config, &m_io_handle));
+        ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(implementation->bus_handle, &io_config, &(implementation->io_handle)));
 
         esp_lcd_panel_dev_config_t device_config = {
             .reset_gpio_num = PIN_LCD_RES,
@@ -75,13 +85,13 @@ namespace hardware
             .bits_per_pixel = 16,
         };
 
-        ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(m_io_handle, &device_config, &m_panel_handle));
-        ESP_ERROR_CHECK(esp_lcd_panel_reset(m_panel_handle));
-        ESP_ERROR_CHECK(esp_lcd_panel_init(m_panel_handle));
-        ESP_ERROR_CHECK(esp_lcd_panel_invert_color(m_panel_handle, true));
-        ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(m_panel_handle, true));
-        ESP_ERROR_CHECK(esp_lcd_panel_mirror(m_panel_handle, false, true));
-        ESP_ERROR_CHECK(esp_lcd_panel_set_gap(m_panel_handle, 0, 35));
+        ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(implementation->io_handle, &device_config, &(implementation->panel_handle)));
+        ESP_ERROR_CHECK(esp_lcd_panel_reset(implementation->panel_handle));
+        ESP_ERROR_CHECK(esp_lcd_panel_init(implementation->panel_handle));
+        ESP_ERROR_CHECK(esp_lcd_panel_invert_color(implementation->panel_handle, true));
+        ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(implementation->panel_handle, true));
+        ESP_ERROR_CHECK(esp_lcd_panel_mirror(implementation->panel_handle, false, true));
+        ESP_ERROR_CHECK(esp_lcd_panel_set_gap(implementation->panel_handle, 0, 35));
 
         // pinMode(PIN_LCD_BACKLIGHT, OUTPUT);
         set_backlight(brightness_level::min);
@@ -91,12 +101,16 @@ namespace hardware
     {
         // pinMode(PIN_LCD_BACKLIGHT, INPUT);
 
-        ESP_ERROR_CHECK(esp_lcd_panel_del(m_panel_handle));
-        ESP_ERROR_CHECK(esp_lcd_panel_io_del(m_io_handle));
-        ESP_ERROR_CHECK(esp_lcd_del_i80_bus(m_bus_handle));
+        auto implementation = static_cast<display_implementation *>(mp_implementation);
+
+        ESP_ERROR_CHECK(esp_lcd_panel_del(implementation->panel_handle));
+        ESP_ERROR_CHECK(esp_lcd_panel_io_del(implementation->io_handle));
+        ESP_ERROR_CHECK(esp_lcd_del_i80_bus(implementation->bus_handle));
 
         // pinMode(PIN_LCD_RD, INPUT);
         // pinMode(PIN_LCD_POWER, INPUT);
+
+        delete implementation;
     }
 
     uint16_t display::width()
@@ -122,6 +136,6 @@ namespace hardware
 
     void display::set_bitmap(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2, uint16_t *data)
     {
-        esp_lcd_panel_draw_bitmap(m_panel_handle, x1, y1, x2 + 1, y2 + 1, data);
+        esp_lcd_panel_draw_bitmap(static_cast<display_implementation *>(mp_implementation)->panel_handle, x1, y1, x2 + 1, y2 + 1, data);
     }
 }
