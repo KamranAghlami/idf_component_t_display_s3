@@ -4,7 +4,7 @@
 #include <esp_lcd_panel_vendor.h>
 // #include <Arduino.h>
 
-#include "config.h"
+#include "hardware/config.h"
 
 #define LCD_PIXELS_WIDTH 320
 #define LCD_PIXELS_HEIGHT 170
