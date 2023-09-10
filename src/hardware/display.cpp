@@ -5,8 +5,6 @@
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
 
-#include "config.h"
-
 #define PIN_LCD_BACKLIGHT GPIO_NUM_38
 #define PIN_LCD_CS GPIO_NUM_6
 #define PIN_LCD_D0 GPIO_NUM_39
@@ -54,7 +52,7 @@ namespace hardware
         esp_lcd_i80_bus_config_t bus_config = {
             .dc_gpio_num = PIN_LCD_DC,
             .wr_gpio_num = PIN_LCD_WR,
-            .clk_src = LCD_CLK_SRC_PLL160M,
+            .clk_src = LCD_CLK_SRC_DEFAULT,
             .data_gpio_nums =
                 {
                     PIN_LCD_D0,
@@ -68,6 +66,8 @@ namespace hardware
                 },
             .bus_width = 8,
             .max_transfer_bytes = LCD_PIXELS_WIDTH * LCD_PIXELS_HEIGHT * sizeof(uint16_t),
+            .psram_trans_align = 4,
+            .sram_trans_align = 4,
         };
 
         ESP_ERROR_CHECK(esp_lcd_new_i80_bus(&bus_config, &(implementation->bus_handle)));
@@ -116,7 +116,7 @@ namespace hardware
 
     display::~display()
     {
-        // pinMode(PIN_LCD_BACKLIGHT, INPUT);
+        ESP_ERROR_CHECK(gpio_reset_pin(PIN_LCD_BACKLIGHT));
 
         auto implementation = static_cast<display_implementation *>(mp_implementation);
 
@@ -124,8 +124,8 @@ namespace hardware
         ESP_ERROR_CHECK(esp_lcd_panel_io_del(implementation->io_handle));
         ESP_ERROR_CHECK(esp_lcd_del_i80_bus(implementation->bus_handle));
 
-        // pinMode(PIN_LCD_RD, INPUT);
-        // pinMode(PIN_LCD_POWER, INPUT);
+        ESP_ERROR_CHECK(gpio_reset_pin(PIN_LCD_POWER));
+        ESP_ERROR_CHECK(gpio_reset_pin(PIN_LCD_RD));
 
         delete implementation;
     }
