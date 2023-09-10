@@ -68,7 +68,7 @@ namespace hardware
                 },
             .bus_width = 8,
             .max_transfer_bytes = sizeof(lv_color_t) * LCD_PIXELS_WIDTH * 16,
-            .psram_trans_align = 4,
+            .psram_trans_align = 32,
             .sram_trans_align = 4,
         };
 
