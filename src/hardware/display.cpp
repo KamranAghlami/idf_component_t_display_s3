@@ -1,12 +1,27 @@
 #include "hardware/display.h"
 
+#include <driver/gpio.h>
 #include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
-// #include <Arduino.h>
 
 #include "config.h"
 
+#define PIN_LCD_BACKLIGHT GPIO_NUM_38
+#define PIN_LCD_CS GPIO_NUM_6
+#define PIN_LCD_D0 GPIO_NUM_39
+#define PIN_LCD_D1 GPIO_NUM_40
+#define PIN_LCD_D2 GPIO_NUM_41
+#define PIN_LCD_D3 GPIO_NUM_42
+#define PIN_LCD_D4 GPIO_NUM_45
+#define PIN_LCD_D5 GPIO_NUM_46
+#define PIN_LCD_D6 GPIO_NUM_47
+#define PIN_LCD_D7 GPIO_NUM_48
+#define PIN_LCD_DC GPIO_NUM_7
+#define PIN_LCD_POWER GPIO_NUM_15
+#define PIN_LCD_RD GPIO_NUM_9
+#define PIN_LCD_RES GPIO_NUM_5
+#define PIN_LCD_WR GPIO_NUM_8
 #define LCD_PIXELS_WIDTH 320
 #define LCD_PIXELS_HEIGHT 170
 
@@ -23,11 +38,16 @@ namespace hardware
 
     display::display() : mp_implementation(static_cast<void *>(new display_implementation()))
     {
-        // pinMode(PIN_LCD_POWER, OUTPUT);
-        // digitalWrite(PIN_LCD_POWER, HIGH);
+        gpio_config_t gpio_cfg = {};
 
-        // pinMode(PIN_LCD_RD, OUTPUT);
-        // digitalWrite(PIN_LCD_RD, HIGH);
+        gpio_cfg.pin_bit_mask = (1ULL << PIN_LCD_RD) | (1ULL << PIN_LCD_POWER) | (1ULL << PIN_LCD_BACKLIGHT);
+        gpio_cfg.mode = GPIO_MODE_OUTPUT;
+
+        ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
+        ESP_ERROR_CHECK(gpio_set_level(PIN_LCD_RD, 1));
+        ESP_ERROR_CHECK(gpio_set_level(PIN_LCD_POWER, 1));
+
+        set_backlight(brightness_level::min);
 
         auto implementation = static_cast<display_implementation *>(mp_implementation);
 
@@ -92,9 +112,6 @@ namespace hardware
         ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(implementation->panel_handle, true));
         ESP_ERROR_CHECK(esp_lcd_panel_mirror(implementation->panel_handle, false, true));
         ESP_ERROR_CHECK(esp_lcd_panel_set_gap(implementation->panel_handle, 0, 35));
-
-        // pinMode(PIN_LCD_BACKLIGHT, OUTPUT);
-        set_backlight(brightness_level::min);
     }
 
     display::~display()
@@ -125,7 +142,19 @@ namespace hardware
 
     void display::set_backlight(brightness_level level)
     {
-        // analogWrite(PIN_LCD_BACKLIGHT, static_cast<int>(level));
+        switch (level)
+        {
+        case brightness_level::min:
+            ESP_ERROR_CHECK(gpio_set_level(PIN_LCD_BACKLIGHT, 0));
+            break;
+
+        case brightness_level::max:
+            ESP_ERROR_CHECK(gpio_set_level(PIN_LCD_BACKLIGHT, 1));
+            break;
+
+        default:
+            break;
+        }
     }
 
     void display::set_transfer_done_callback(transfer_done_callback_t on_transfer_done, void *user_data)
