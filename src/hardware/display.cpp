@@ -5,6 +5,8 @@
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
 
+#include <lvgl/lvgl.h>
+
 #define PIN_LCD_BACKLIGHT GPIO_NUM_38
 #define PIN_LCD_CS GPIO_NUM_6
 #define PIN_LCD_D0 GPIO_NUM_39
@@ -49,7 +51,7 @@ namespace hardware
 
         auto implementation = static_cast<display_implementation *>(mp_implementation);
 
-        esp_lcd_i80_bus_config_t bus_config = {
+        const esp_lcd_i80_bus_config_t bus_config = {
             .dc_gpio_num = PIN_LCD_DC,
             .wr_gpio_num = PIN_LCD_WR,
             .clk_src = LCD_CLK_SRC_DEFAULT,
@@ -65,7 +67,7 @@ namespace hardware
                     PIN_LCD_D7,
                 },
             .bus_width = 8,
-            .max_transfer_bytes = LCD_PIXELS_WIDTH * LCD_PIXELS_HEIGHT * sizeof(uint16_t),
+            .max_transfer_bytes = sizeof(lv_color_t) * LCD_PIXELS_WIDTH * 16,
             .psram_trans_align = 4,
             .sram_trans_align = 4,
         };
@@ -81,7 +83,7 @@ namespace hardware
             return false;
         };
 
-        esp_lcd_panel_io_i80_config_t io_config = {
+        const esp_lcd_panel_io_i80_config_t io_config = {
             .cs_gpio_num = PIN_LCD_CS,
             .pclk_hz = 10 * 1000 * 1000,
             .trans_queue_depth = 20,
@@ -95,14 +97,25 @@ namespace hardware
                 .dc_dummy_level = 0,
                 .dc_data_level = 1,
             },
+            .flags = {
+                .cs_active_high = 0,
+                .reverse_color_bits = 0,
+                .swap_color_bytes = !LV_COLOR_16_SWAP,
+                .pclk_active_neg = 0,
+                .pclk_idle_low = 0,
+            },
         };
 
         ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(implementation->bus_handle, &io_config, &(implementation->io_handle)));
 
         esp_lcd_panel_dev_config_t device_config = {
             .reset_gpio_num = PIN_LCD_RES,
-            // .color_space = ESP_LCD_COLOR_SPACE_RGB,
+            .rgb_endian = LCD_RGB_ENDIAN_RGB,
             .bits_per_pixel = 16,
+            .flags = {
+                .reset_active_high = 0,
+            },
+            .vendor_config = nullptr,
         };
 
         ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(implementation->io_handle, &device_config, &(implementation->panel_handle)));
