@@ -39,10 +39,13 @@ namespace hardware
 
     display::display() : mp_implementation(static_cast<void *>(new display_implementation()))
     {
-        gpio_config_t gpio_cfg = {};
-
-        gpio_cfg.pin_bit_mask = (1ULL << PIN_LCD_RD) | (1ULL << PIN_LCD_POWER) | (1ULL << PIN_LCD_BACKLIGHT);
-        gpio_cfg.mode = GPIO_MODE_OUTPUT;
+        const gpio_config_t gpio_cfg = {
+            .pin_bit_mask = (1ULL << PIN_LCD_RD) | (1ULL << PIN_LCD_POWER) | (1ULL << PIN_LCD_BACKLIGHT),
+            .mode = GPIO_MODE_OUTPUT,
+            .pull_up_en = GPIO_PULLUP_DISABLE,
+            .pull_down_en = GPIO_PULLDOWN_DISABLE,
+            .intr_type = GPIO_INTR_DISABLE,
+        };
 
         ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
         ESP_ERROR_CHECK(gpio_set_level(PIN_LCD_RD, 1));
@@ -109,7 +112,7 @@ namespace hardware
 
         ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(implementation->bus_handle, &io_config, &(implementation->io_handle)));
 
-        esp_lcd_panel_dev_config_t device_config = {
+        const esp_lcd_panel_dev_config_t device_config = {
             .reset_gpio_num = PIN_LCD_RES,
             .rgb_endian = LCD_RGB_ENDIAN_RGB,
             .bits_per_pixel = 16,

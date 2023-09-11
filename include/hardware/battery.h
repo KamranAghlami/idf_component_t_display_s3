@@ -22,5 +22,7 @@ namespace hardware
         static battery s_instance;
 
         battery();
+
+        void *mp_implementation = nullptr;
     };
 }
