@@ -1,8 +1,8 @@
 #include "hardware/battery.h"
 
-// #include <Arduino.h>
+#include <driver/gpio.h>
 
-#include "config.h"
+static const gpio_num_t PIN_BATTERY = GPIO_NUM_4;
 
 namespace hardware
 {

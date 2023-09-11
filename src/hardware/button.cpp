@@ -1,9 +1,11 @@
 #include "hardware/button.h"
 
 #include <algorithm>
+#include <driver/gpio.h>
 #include <esp_timer.h>
 
-// #include <Arduino.h>
+static const gpio_num_t PIN_BUTTON_1 = GPIO_NUM_0;
+static const gpio_num_t PIN_BUTTON_2 = GPIO_NUM_14;
 
 namespace hardware
 {
