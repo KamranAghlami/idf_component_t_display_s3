@@ -125,6 +125,7 @@ namespace hardware
         ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(implementation->panel_handle, true));
         ESP_ERROR_CHECK(esp_lcd_panel_mirror(implementation->panel_handle, false, true));
         ESP_ERROR_CHECK(esp_lcd_panel_set_gap(implementation->panel_handle, 0, 35));
+        ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(implementation->panel_handle, true));
     }
 
     display::~display()
