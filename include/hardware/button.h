@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 #include <driver/gpio.h>
 
@@ -24,7 +25,7 @@ namespace hardware
         ~button();
 
     private:
-        static std::vector<button> s_buttons;
+        static std::vector<std::unique_ptr<button>> s_buttons;
         static std::vector<key_event> s_key_events;
 
         static void tick();

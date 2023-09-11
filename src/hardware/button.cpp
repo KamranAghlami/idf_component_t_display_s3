@@ -5,27 +5,27 @@
 
 namespace hardware
 {
-    std::vector<button> button::s_buttons;
+    std::vector<std::unique_ptr<button>> button::s_buttons;
     std::vector<button::key_event> button::s_key_events;
 
     void button::add(gpio_num_t pin, uint32_t id)
     {
         for (auto &btn : s_buttons)
-            if (btn.m_pin == pin)
+            if (btn->m_pin == pin)
             {
-                btn.m_id = id;
+                btn->m_id = id;
 
                 return;
             }
 
-        s_buttons.push_back({pin, id});
+        s_buttons.emplace_back(new button(pin, id));
     }
 
     void button::remove(gpio_num_t pin)
     {
-        auto predicate = [&pin](const button &btn)
+        auto predicate = [&pin](const std::unique_ptr<button> &btn)
         {
-            return btn.m_pin == pin;
+            return btn->m_pin == pin;
         };
 
         s_buttons.erase(std::remove_if(s_buttons.begin(), s_buttons.end(), predicate), s_buttons.end());
@@ -34,11 +34,11 @@ namespace hardware
     void button::tick()
     {
         for (auto &btn : s_buttons)
-            if (btn.m_last_state == gpio_get_level(btn.m_pin))
+            if (btn->m_last_state == gpio_get_level(btn->m_pin))
             {
-                btn.m_last_state = !btn.m_last_state;
+                btn->m_last_state = !btn->m_last_state;
 
-                s_key_events.push_back({btn.m_id, btn.m_last_state, (esp_timer_get_time() / 1000LL)});
+                s_key_events.push_back({btn->m_id, btn->m_last_state, (esp_timer_get_time() / 1000LL)});
             }
     }
 
