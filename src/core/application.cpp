@@ -5,10 +5,12 @@
 #include <freertos/task.h>
 #include <esp_timer.h>
 
-#include "hardware/config.h"
 #include "hardware/storage.h"
 #include "hardware/button.h"
 #include "hardware/display.h"
+
+static const gpio_num_t PIN_BUTTON_1 = GPIO_NUM_0;
+static const gpio_num_t PIN_BUTTON_2 = GPIO_NUM_14;
 
 application *application::s_instance = nullptr;
 

@@ -1,18 +1,14 @@
 #include "hardware/button.h"
 
 #include <algorithm>
-#include <driver/gpio.h>
 #include <esp_timer.h>
-
-static const gpio_num_t PIN_BUTTON_1 = GPIO_NUM_0;
-static const gpio_num_t PIN_BUTTON_2 = GPIO_NUM_14;
 
 namespace hardware
 {
     std::vector<button> button::s_buttons;
     std::vector<button::key_event> button::s_key_events;
 
-    void button::add(uint8_t pin, uint32_t id)
+    void button::add(gpio_num_t pin, uint32_t id)
     {
         for (auto &btn : s_buttons)
             if (btn.m_pin == pin)
@@ -25,7 +21,7 @@ namespace hardware
         s_buttons.push_back({pin, id});
     }
 
-    void button::remove(uint8_t pin)
+    void button::remove(gpio_num_t pin)
     {
         auto predicate = [&pin](const button &btn)
         {
@@ -38,7 +34,7 @@ namespace hardware
     void button::tick()
     {
         for (auto &btn : s_buttons)
-            if (btn.m_last_state == false) // digitalRead(btn.m_pin))
+            if (btn.m_last_state == gpio_get_level(btn.m_pin))
             {
                 btn.m_last_state = !btn.m_last_state;
 
@@ -66,15 +62,21 @@ namespace hardware
         return data;
     }
 
-    button::button(uint8_t pin, uint32_t id) : m_pin(pin),
-                                               m_id(id),
-                                               m_last_state(false)
+    button::button(gpio_num_t pin, uint32_t id) : m_pin(pin),
+                                                  m_id(id),
+                                                  m_last_state(false)
     {
-        // pinMode(m_pin, INPUT_PULLUP);
+        gpio_config_t gpio_cfg = {};
+
+        gpio_cfg.pin_bit_mask = (1ULL << pin);
+        gpio_cfg.mode = GPIO_MODE_INPUT;
+        gpio_cfg.pull_up_en = GPIO_PULLUP_ENABLE;
+
+        ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
     }
 
     button::~button()
     {
-        // pinMode(m_pin, INPUT);
+        ESP_ERROR_CHECK(gpio_reset_pin(m_pin));
     }
 }

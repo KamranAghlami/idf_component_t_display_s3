@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 
+#include <driver/gpio.h>
+
 namespace hardware
 {
     class button
@@ -15,8 +17,8 @@ namespace hardware
             int64_t timestamp;
         };
 
-        static void add(uint8_t pin, uint32_t id);
-        static void remove(uint8_t pin);
+        static void add(gpio_num_t pin, uint32_t id);
+        static void remove(gpio_num_t pin);
         static const key_event get_data();
 
         ~button();
@@ -27,9 +29,9 @@ namespace hardware
 
         static void tick();
 
-        button(uint8_t pin, uint32_t id);
+        button(gpio_num_t pin, uint32_t id);
 
-        uint8_t m_pin;
+        gpio_num_t m_pin;
         uint32_t m_id;
 
         bool m_last_state;
