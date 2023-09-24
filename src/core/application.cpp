@@ -125,11 +125,34 @@ application::~application()
     hardware::storage::unmount(LV_FS_POSIX_PATH);
 }
 
+class msc_application : public application
+{
+public:
+    msc_application() {}
+    ~msc_application() {}
+
+    void on_create() override {}
+    void on_update(float timestep) override {}
+};
+
 application *create_application();
 
 extern "C" void app_main(void)
 {
-    create_application();
+    const gpio_config_t gpio_cfg = {
+        .pin_bit_mask = (1ULL << PIN_BUTTON_2),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+
+    ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
+
+    if (!gpio_get_level(PIN_BUTTON_2))
+        new msc_application();
+    else
+        create_application();
 
     while (true)
         vTaskDelay(pdMS_TO_TICKS(lv_timer_handler()));
