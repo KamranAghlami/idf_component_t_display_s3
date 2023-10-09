@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 #include <lvgl/lvgl.h>
 
@@ -15,9 +16,13 @@ public:
     application &operator=(const application &) = delete;
     application &operator=(application &&) = delete;
 
+    bool is_running() { return m_is_running; };
+
 protected:
     virtual void on_create() = 0;
     virtual void on_update(float timestep) = 0;
+
+    bool m_is_running;
 
 private:
     static application *s_instance;
@@ -28,3 +33,5 @@ private:
 
     int64_t m_previous_timestamp = 0;
 };
+
+std::unique_ptr<application> create_application();
