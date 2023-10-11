@@ -5,9 +5,9 @@
 class msc_application : public application
 {
 public:
-    msc_application() {}
-    ~msc_application() {}
+    msc_application();
+    ~msc_application();
 
-    void on_create() override {}
-    void on_update(float timestep) override {}
+    void on_create() override;
+    void on_update(float timestep) override;
 };
