@@ -38,18 +38,18 @@ msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE)
 
     ESP_ERROR_CHECK(wl_mount(partition, &m_wl_handle));
 
-    const tinyusb_msc_spiflash_config_t config_spi = {
+    const tinyusb_msc_spiflash_config_t spiflash_config = {
         .wl_handle = m_wl_handle,
         .callback_mount_changed = nullptr,    /*!< Pointer to the function callback that will be delivered AFTER mount/unmount operation is successfully finished */
         .callback_premount_changed = nullptr, /*!< Pointer to the function callback that will be delivered BEFORE mount/unmount operation is started */
         .mount_config = {},
     };
 
-    ESP_ERROR_CHECK(tinyusb_msc_storage_init_spiflash(&config_spi));
+    ESP_ERROR_CHECK(tinyusb_msc_storage_init_spiflash(&spiflash_config));
     ESP_ERROR_CHECK(tinyusb_msc_storage_mount(LV_FS_POSIX_PATH));
 
-    static tusb_desc_device_t descriptor_config = {
-        .bLength = sizeof(descriptor_config),
+    static tusb_desc_device_t device_descriptor = {
+        .bLength = sizeof(device_descriptor),
         .bDescriptorType = TUSB_DESC_DEVICE,
         .bcdUSB = 0x0200,
         .bDeviceClass = TUSB_CLASS_MISC,
@@ -65,7 +65,7 @@ msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE)
         .bNumConfigurations = 0x01,
     };
 
-    static char const *string_desc_arr[] = {
+    static char const *string_descriptor[] = {
         (const char[]){0x09, 0x04}, // 0: is supported language is English (0x0409)
         "TinyUSB",                  // 1: Manufacturer
         "TinyUSB Device",           // 2: Product
@@ -73,7 +73,7 @@ msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE)
         "Example MSC",              // 4. MSC
     };
 
-    static uint8_t const desc_configuration[] = {
+    static uint8_t const configuration_descriptor[] = {
         // Config number, interface count, string index, total length, attribute, power in mA
         TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, TUSB_DESC_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
 
@@ -81,17 +81,17 @@ msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE)
         TUD_MSC_DESCRIPTOR(ITF_NUM_MSC, 0, EDPT_MSC_OUT, EDPT_MSC_IN, TUD_OPT_HIGH_SPEED ? 512 : 64),
     };
 
-    const tinyusb_config_t tusb_cfg = {
-        .device_descriptor = &descriptor_config,
-        .string_descriptor = string_desc_arr,
-        .string_descriptor_count = sizeof(string_desc_arr) / sizeof(string_desc_arr[0]),
+    const tinyusb_config_t tinyusb_config = {
+        .device_descriptor = &device_descriptor,
+        .string_descriptor = string_descriptor,
+        .string_descriptor_count = sizeof(string_descriptor) / sizeof(string_descriptor[0]),
         .external_phy = false,
-        .configuration_descriptor = desc_configuration,
+        .configuration_descriptor = configuration_descriptor,
         .self_powered = false,
         .vbus_monitor_io = 0,
     };
 
-    ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
+    ESP_ERROR_CHECK(tinyusb_driver_install(&tinyusb_config));
     ESP_ERROR_CHECK(tinyusb_msc_storage_unmount());
 }
 
