@@ -5,5 +5,3 @@ dependencies:
     version: "^1.2"
   lvgl:
     git: https://github.com/KamranAghlami/idf_component_lvgl.git
-  lua:
-    git: https://github.com/KamranAghlami/idf_component_lua.git
