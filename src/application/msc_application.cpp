@@ -67,10 +67,10 @@ msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE)
 
     static char const *string_descriptor[] = {
         (const char[]){0x09, 0x04}, // 0: is supported language is English (0x0409)
-        "TinyUSB",                  // 1: Manufacturer
-        "TinyUSB Device",           // 2: Product
-        "123456",                   // 3: Serials
-        "Example MSC",              // 4. MSC
+        "LILYGO",                   // 1: Manufacturer
+        "T-Display-S3",             // 2: Product
+        "0123456789",               // 3: Serials
+        "Espressif MSC Device",     // 4. MSC
     };
 
     static uint8_t const configuration_descriptor[] = {
