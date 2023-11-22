@@ -144,6 +144,13 @@ void msc_application::on_create()
 {
     lv_obj_clear_flag(m_screen, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_bg_color(m_screen, lv_color_black(), LV_STATE_DEFAULT);
+
+    m_icon = lv_img_create(m_screen);
+
+    LV_IMG_DECLARE(msc_icon);
+
+    lv_img_set_src(m_icon, &msc_icon);
+    lv_obj_center(m_icon);
 }
 
 void msc_application::on_update(float timestep)

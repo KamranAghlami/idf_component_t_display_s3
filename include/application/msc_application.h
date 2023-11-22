@@ -21,4 +21,6 @@ private:
 
     lv_group_t *m_group;
     lv_obj_t *m_screen;
+
+    lv_obj_t *m_icon;
 };
