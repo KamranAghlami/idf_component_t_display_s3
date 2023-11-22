@@ -15,4 +15,10 @@ public:
 
 private:
     wl_handle_t m_wl_handle;
+
+    const uint16_t m_width;
+    const uint16_t m_height;
+
+    lv_group_t *m_group;
+    lv_obj_t *m_screen;
 };

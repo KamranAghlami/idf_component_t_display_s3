@@ -5,6 +5,7 @@
 #include <tinyusb.h>
 
 #include "hardware/storage.h"
+#include "hardware/display.h"
 
 #define TUSB_DESC_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_MSC_DESC_LEN)
 
@@ -23,7 +24,11 @@ enum
     EDPT_MSC_IN = 0x81,
 };
 
-msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE)
+msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE),
+                                     m_width(hardware::display::get().width()),
+                                     m_height(hardware::display::get().height()),
+                                     m_group(lv_group_create()),
+                                     m_screen(lv_scr_act())
 {
     hardware::storage::unmount(LV_FS_POSIX_PATH);
 
@@ -93,10 +98,41 @@ msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE)
 
     ESP_ERROR_CHECK(tinyusb_driver_install(&tinyusb_config));
     ESP_ERROR_CHECK(tinyusb_msc_storage_unmount());
+
+    lv_indev_t *indev = nullptr;
+
+    while ((indev = lv_indev_get_next(indev)))
+        if (lv_indev_get_type(indev) == LV_INDEV_TYPE_KEYPAD)
+            lv_indev_set_group(indev, m_group);
+
+    lv_group_add_obj(m_group, m_screen);
+
+    auto on_key = [](lv_event_t *e)
+    {
+        auto app = static_cast<msc_application *>(lv_event_get_user_data(e));
+        auto key = lv_event_get_key(e);
+
+        switch (key)
+        {
+        case LV_KEY_UP:
+            break;
+        case LV_KEY_DOWN:
+            break;
+        case LV_KEY_ENTER:
+            app->m_is_running = false;
+            break;
+        default:
+            break;
+        }
+    };
+
+    lv_obj_add_event_cb(m_screen, on_key, LV_EVENT_KEY, this);
 }
 
 msc_application::~msc_application()
 {
+    lv_group_del(m_group);
+
     ESP_ERROR_CHECK(tinyusb_msc_storage_mount(LV_FS_POSIX_PATH));
 
     tinyusb_msc_storage_deinit();
@@ -106,6 +142,8 @@ msc_application::~msc_application()
 
 void msc_application::on_create()
 {
+    lv_obj_clear_flag(m_screen, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(m_screen, lv_color_black(), LV_STATE_DEFAULT);
 }
 
 void msc_application::on_update(float timestep)
