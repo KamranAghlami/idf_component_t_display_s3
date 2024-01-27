@@ -27,7 +27,7 @@ namespace hardware
         ESP_ERROR_CHECK(adc_oneshot_new_unit(&adc_config, &implementation->adc_handle));
 
         const adc_oneshot_chan_cfg_t channel_config = {
-            .atten = ADC_ATTEN_DB_11,
+            .atten = ADC_ATTEN_DB_12,
             .bitwidth = ADC_BITWIDTH_DEFAULT,
         };
 

@@ -115,6 +115,7 @@ namespace hardware
         const esp_lcd_panel_dev_config_t device_config = {
             .reset_gpio_num = PIN_LCD_RES,
             .rgb_endian = LCD_RGB_ENDIAN_RGB,
+            .data_endian = LCD_RGB_DATA_ENDIAN_BIG,
             .bits_per_pixel = 16,
             .flags = {
                 .reset_active_high = 0,
