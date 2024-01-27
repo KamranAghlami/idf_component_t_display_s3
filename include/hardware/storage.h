@@ -9,7 +9,7 @@ namespace hardware
             internal,
         };
 
-        void mount(type storage_type, const char *mount_point);
-        void unmount(const char *mount_point);
+        void mount(const type storage_type, const char *mount_point);
+        void unmount(const type storage_type);
     }
 }

@@ -3,43 +3,38 @@
 #include <map>
 #include <string>
 
-#include <esp_vfs_fat.h>
+#include <esp_littlefs.h>
 
 namespace hardware
 {
     namespace storage
     {
-        static std::map<std::string, wl_handle_t> handles;
+        static const char partition_label[] = "storage";
 
-        void mount(type storage_type, const char *mount_point)
+        void mount(const type storage_type, const char *mount_point)
         {
-            if (storage_type != type::internal)
+            if (storage_type != type::internal || esp_littlefs_mounted(partition_label))
                 return;
 
-            const esp_vfs_fat_mount_config_t mount_config = {
+            const esp_vfs_littlefs_conf_t littlefs_config = {
+                .base_path = mount_point,
+                .partition_label = partition_label,
+                .partition = nullptr,
                 .format_if_mount_failed = true,
-                .max_files = 4,
-                .allocation_unit_size = CONFIG_WL_SECTOR_SIZE,
-                .disk_status_check_enable = false,
+                .read_only = false,
+                .dont_mount = false,
+                .grow_on_mount = true,
             };
 
-            wl_handle_t wl_handle = WL_INVALID_HANDLE;
-
-            ESP_ERROR_CHECK(esp_vfs_fat_spiflash_mount_rw_wl(mount_point, "storage", &mount_config, &wl_handle));
-
-            handles[mount_point] = wl_handle;
+            ESP_ERROR_CHECK(esp_vfs_littlefs_register(&littlefs_config));
         }
 
-        void unmount(const char *mount_point)
+        void unmount(const type storage_type)
         {
-            if (handles.find(mount_point) == handles.end())
+            if (storage_type != type::internal || !esp_littlefs_mounted(partition_label))
                 return;
 
-            auto wl_handle = handles[mount_point];
-
-            ESP_ERROR_CHECK(esp_vfs_fat_spiflash_unmount_rw_wl(mount_point, wl_handle));
-
-            handles.erase(mount_point);
+            ESP_ERROR_CHECK(esp_vfs_littlefs_unregister(partition_label));
         }
     }
 }

@@ -118,5 +118,5 @@ application::~application()
 
     lv_deinit();
 
-    hardware::storage::unmount(LV_FS_POSIX_PATH);
+    hardware::storage::unmount(hardware::storage::type::internal);
 }

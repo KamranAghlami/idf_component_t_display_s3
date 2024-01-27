@@ -30,7 +30,7 @@ msc_application::msc_application() : m_wl_handle(WL_INVALID_HANDLE),
                                      m_group(lv_group_create()),
                                      m_screen(lv_scr_act())
 {
-    hardware::storage::unmount(LV_FS_POSIX_PATH);
+    hardware::storage::unmount(hardware::storage::type::internal);
 
     const esp_partition_t *partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "storage");
 
