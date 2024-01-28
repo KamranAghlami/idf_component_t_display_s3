@@ -20,7 +20,7 @@ application::application() : m_is_running(true)
     hardware::storage::mount(hardware::storage::type::nvs);
     hardware::storage::mount(hardware::storage::type::internal, LV_FS_POSIX_PATH);
 
-    hardware::wifi::get().init();
+    hardware::wifi::get();
 
     hardware::button::add(GPIO_NUM_0, 0b00000001);
     hardware::button::add(GPIO_NUM_14, 0b00000010);
