@@ -112,9 +112,7 @@ application::application() : m_is_running(true)
 
     display.set_backlight(hardware::display::brightness_level::max);
 
-    // auto &wifi = hardware::wifi::get();
-
-    // wifi.init();
+    hardware::wifi::get().init();
 }
 
 application::~application()
