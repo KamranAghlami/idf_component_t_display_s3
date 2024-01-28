@@ -18,7 +18,15 @@ namespace hardware
             max = 0xff,
         };
 
-        static display &get() { return s_instance; };
+        static display &get()
+        {
+            if (sp_instance)
+                return *sp_instance;
+
+            sp_instance = new display();
+
+            return *sp_instance;
+        };
 
         ~display();
 
@@ -35,7 +43,7 @@ namespace hardware
         void set_bitmap(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2, uint16_t *data);
 
     private:
-        static display s_instance;
+        static display *sp_instance;
 
         display();
 

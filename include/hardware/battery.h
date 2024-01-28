@@ -7,7 +7,15 @@ namespace hardware
     class battery
     {
     public:
-        static battery &get() { return s_instance; };
+        static battery &get()
+        {
+            if (sp_instance)
+                return *sp_instance;
+
+            sp_instance = new battery();
+
+            return *sp_instance;
+        };
 
         ~battery();
 
@@ -19,7 +27,7 @@ namespace hardware
         uint32_t voltage_level();
 
     private:
-        static battery s_instance;
+        static battery *sp_instance;
 
         battery();
 

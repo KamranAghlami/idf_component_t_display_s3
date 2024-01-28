@@ -35,7 +35,7 @@ namespace hardware
         esp_lcd_panel_handle_t panel_handle = nullptr;
     };
 
-    display display::s_instance;
+    display *display::sp_instance = nullptr;
 
     display::display() : mp_implementation(std::make_unique<display_implementation>())
     {

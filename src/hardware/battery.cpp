@@ -12,7 +12,7 @@ namespace hardware
         adc_cali_handle_t calibration_handle = nullptr;
     };
 
-    battery battery::s_instance;
+    battery *battery::sp_instance = nullptr;
 
     battery::battery() : mp_implementation(static_cast<void *>(new battery_implementation()))
     {

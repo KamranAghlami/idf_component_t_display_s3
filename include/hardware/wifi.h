@@ -9,7 +9,15 @@ namespace hardware
     class wifi
     {
     public:
-        static wifi &get() { return s_instance; };
+        static wifi &get()
+        {
+            if (sp_instance)
+                return *sp_instance;
+
+            sp_instance = new wifi();
+
+            return *sp_instance;
+        };
 
         ~wifi();
 
@@ -21,7 +29,7 @@ namespace hardware
         void init();
 
     private:
-        static wifi s_instance;
+        static wifi *sp_instance;
 
         std::unique_ptr<wifi_implementation> mp_implementation;
 
