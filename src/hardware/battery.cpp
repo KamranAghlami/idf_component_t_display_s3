@@ -2,7 +2,7 @@
 
 #include <esp_adc/adc_oneshot.h>
 
-static const adc_channel_t CHANNEL_BATTERY = ADC_CHANNEL_3;
+constexpr adc_channel_t CHANNEL_BATTERY = ADC_CHANNEL_3;
 
 namespace hardware
 {

@@ -7,24 +7,24 @@
 
 #include <lvgl/lvgl.h>
 
-static const gpio_num_t PIN_LCD_BACKLIGHT = GPIO_NUM_38;
-static const gpio_num_t PIN_LCD_CS = GPIO_NUM_6;
-static const gpio_num_t PIN_LCD_D0 = GPIO_NUM_39;
-static const gpio_num_t PIN_LCD_D1 = GPIO_NUM_40;
-static const gpio_num_t PIN_LCD_D2 = GPIO_NUM_41;
-static const gpio_num_t PIN_LCD_D3 = GPIO_NUM_42;
-static const gpio_num_t PIN_LCD_D4 = GPIO_NUM_45;
-static const gpio_num_t PIN_LCD_D5 = GPIO_NUM_46;
-static const gpio_num_t PIN_LCD_D6 = GPIO_NUM_47;
-static const gpio_num_t PIN_LCD_D7 = GPIO_NUM_48;
-static const gpio_num_t PIN_LCD_DC = GPIO_NUM_7;
-static const gpio_num_t PIN_LCD_POWER = GPIO_NUM_15;
-static const gpio_num_t PIN_LCD_RD = GPIO_NUM_9;
-static const gpio_num_t PIN_LCD_RES = GPIO_NUM_5;
-static const gpio_num_t PIN_LCD_WR = GPIO_NUM_8;
+constexpr gpio_num_t PIN_LCD_BACKLIGHT = GPIO_NUM_38;
+constexpr gpio_num_t PIN_LCD_CS = GPIO_NUM_6;
+constexpr gpio_num_t PIN_LCD_D0 = GPIO_NUM_39;
+constexpr gpio_num_t PIN_LCD_D1 = GPIO_NUM_40;
+constexpr gpio_num_t PIN_LCD_D2 = GPIO_NUM_41;
+constexpr gpio_num_t PIN_LCD_D3 = GPIO_NUM_42;
+constexpr gpio_num_t PIN_LCD_D4 = GPIO_NUM_45;
+constexpr gpio_num_t PIN_LCD_D5 = GPIO_NUM_46;
+constexpr gpio_num_t PIN_LCD_D6 = GPIO_NUM_47;
+constexpr gpio_num_t PIN_LCD_D7 = GPIO_NUM_48;
+constexpr gpio_num_t PIN_LCD_DC = GPIO_NUM_7;
+constexpr gpio_num_t PIN_LCD_POWER = GPIO_NUM_15;
+constexpr gpio_num_t PIN_LCD_RD = GPIO_NUM_9;
+constexpr gpio_num_t PIN_LCD_RES = GPIO_NUM_5;
+constexpr gpio_num_t PIN_LCD_WR = GPIO_NUM_8;
 
-static const uint16_t LCD_PIXELS_WIDTH = 320;
-static const uint16_t LCD_PIXELS_HEIGHT = 170;
+constexpr uint16_t LCD_PIXELS_WIDTH = 320;
+constexpr uint16_t LCD_PIXELS_HEIGHT = 170;
 
 namespace hardware
 {
