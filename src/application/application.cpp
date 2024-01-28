@@ -111,8 +111,6 @@ application::application() : m_is_running(true)
     lv_timer_create(on_update, 33, this);
 
     display.set_backlight(hardware::display::brightness_level::max);
-
-    // hardware::wifi::get().init();
 }
 
 application::~application()
