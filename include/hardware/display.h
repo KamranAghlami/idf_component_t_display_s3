@@ -1,9 +1,12 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 namespace hardware
 {
+    struct display_implementation;
+
     class display
     {
     public:
@@ -36,7 +39,7 @@ namespace hardware
 
         display();
 
-        void *mp_implementation = nullptr;
+        std::unique_ptr<display_implementation> mp_implementation;
 
         transfer_done_callback_t m_on_transfer_done_callback = nullptr;
         void *m_on_transfer_done_user_data = nullptr;

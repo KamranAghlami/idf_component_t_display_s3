@@ -1,7 +1,11 @@
 #pragma once
 
+#include <memory>
+
 namespace hardware
 {
+    struct wifi_implementation;
+
     class wifi
     {
     public:
@@ -16,6 +20,8 @@ namespace hardware
 
     private:
         static wifi s_instance;
+
+        std::unique_ptr<wifi_implementation> mp_implementation;
 
         wifi();
     };

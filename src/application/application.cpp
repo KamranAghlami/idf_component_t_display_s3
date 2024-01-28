@@ -5,6 +5,7 @@
 #include <esp_timer.h>
 
 #include "hardware/storage.h"
+#include "hardware/wifi.h"
 #include "hardware/button.h"
 #include "hardware/display.h"
 
@@ -16,7 +17,10 @@ application::application() : m_is_running(true)
 
     s_instance = this;
 
+    hardware::storage::mount(hardware::storage::type::nvs);
     hardware::storage::mount(hardware::storage::type::internal, LV_FS_POSIX_PATH);
+
+    auto &wifi = hardware::wifi::get();
 
     hardware::button::add(GPIO_NUM_0, 0b00000001);
     hardware::button::add(GPIO_NUM_14, 0b00000010);
