@@ -9,9 +9,9 @@
 
 namespace hardware
 {
-    constexpr char *TAG = "wifi softAP";
-    constexpr char *WIFI_SSID = "T-Display-S3";
-    constexpr char *WIFI_PASS = "0123456789";
+    constexpr const char *TAG = "wifi softAP";
+    constexpr const char *WIFI_SSID = "T-Display-S3";
+    constexpr const char *WIFI_PASS = "0123456789";
     constexpr uint8_t WIFI_CHAN = 1;
     constexpr uint8_t MAX_CONN = 2;
 
