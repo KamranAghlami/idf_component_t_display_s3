@@ -26,8 +26,6 @@ namespace hardware
         wifi &operator=(const wifi &) = delete;
         wifi &operator=(wifi &&) = delete;
 
-        void init();
-
     private:
         static wifi *sp_instance;
 
