@@ -20,6 +20,8 @@ namespace hardware
         esp_netif_t *network_interface = nullptr;
     };
 
+    wifi wifi::s_instance;
+
     static void wifi_event_handler(void *arg, esp_event_base_t event_base,
                                    int32_t event_id, void *event_data)
     {
@@ -86,5 +88,10 @@ namespace hardware
     wifi::~wifi()
     {
         esp_netif_destroy_default_wifi(mp_implementation->network_interface);
+    }
+
+    void wifi::init()
+    {
+        ESP_LOGI(TAG, "starting...");
     }
 }

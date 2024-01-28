@@ -20,8 +20,6 @@ application::application() : m_is_running(true)
     hardware::storage::mount(hardware::storage::type::nvs);
     hardware::storage::mount(hardware::storage::type::internal, LV_FS_POSIX_PATH);
 
-    auto &wifi = hardware::wifi::get();
-
     hardware::button::add(GPIO_NUM_0, 0b00000001);
     hardware::button::add(GPIO_NUM_14, 0b00000010);
 
@@ -113,6 +111,10 @@ application::application() : m_is_running(true)
     lv_timer_create(on_update, 33, this);
 
     display.set_backlight(hardware::display::brightness_level::max);
+
+    // auto &wifi = hardware::wifi::get();
+
+    // wifi.init();
 }
 
 application::~application()
