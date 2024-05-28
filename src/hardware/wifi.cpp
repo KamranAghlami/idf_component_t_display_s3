@@ -88,7 +88,7 @@ namespace hardware
     wifi::~wifi()
     {
         esp_netif_destroy_default_wifi(mp_implementation->network_interface);
-        ESP_ERROR_CHECK(esp_event_loop_create_default());
+        ESP_ERROR_CHECK(esp_event_loop_delete_default());
         ESP_ERROR_CHECK(esp_netif_deinit());
     }
 }
