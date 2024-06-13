@@ -10,7 +10,7 @@ namespace hardware
 {
     namespace storage
     {
-        static const char *PARTITION_LABEL = "storage";
+        constexpr const char *PARTITION_LABEL = "storage";
 
         void mount(const type storage_type)
         {
