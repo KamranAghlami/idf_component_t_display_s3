@@ -83,13 +83,6 @@ namespace hardware
             }
         }
 
-        void print()
-        {
-            ESP_LOGI(TAG, "mode: %s", mode == wifi_mode::ACCESS_POINT ? "AccessPoint" : "Station");
-            ESP_LOGI(TAG, "ssid: %s", ssid);
-            ESP_LOGI(TAG, "password: %s", password);
-        }
-
         nvs_handle_t nvs_handle = 0;
         wifi_mode mode = wifi_mode::ACCESS_POINT;
         char *ssid = nullptr;
@@ -187,7 +180,6 @@ namespace hardware
         ESP_ERROR_CHECK(nvs_open(TAG, NVS_READWRITE, &mp_implementation->nvs_handle));
 
         mp_implementation->load_config();
-        mp_implementation->print();
 
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
