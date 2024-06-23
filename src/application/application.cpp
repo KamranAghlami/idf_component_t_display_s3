@@ -110,17 +110,20 @@ application::application() : m_is_running(true)
         app->on_update(timestep / 1000000.0f);
     };
 
-    lv_timer_create(on_update, 33, this);
+    m_timer = lv_timer_create(on_update, 33, this);
 
     display.set_backlight(hardware::display::brightness_level::max);
 }
 
 application::~application()
 {
+    lv_timer_del(m_timer);
+
     free(m_disp_drv.draw_buf->buf1);
     free(m_disp_drv.draw_buf->buf2);
 
     lv_deinit();
 
     hardware::storage::unmount(hardware::storage::type::internal);
+    hardware::storage::unmount(hardware::storage::type::nvs);
 }

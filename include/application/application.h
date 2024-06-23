@@ -32,6 +32,7 @@ private:
     lv_indev_drv_t m_indev_drv;
 
     int64_t m_previous_timestamp = 0;
+    lv_timer_t *m_timer = nullptr;
 };
 
 std::unique_ptr<application> create_application();
