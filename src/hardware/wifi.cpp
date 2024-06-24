@@ -139,6 +139,7 @@ namespace hardware
         {
             bool config_changed : 1;
             bool should_restart : 1;
+            bool info_updated : 1;
         } m_flags = {};
 
         nvs_handle_t m_nvs_handle = 0;
@@ -149,6 +150,7 @@ namespace hardware
         esp_event_handler_instance_t event_handler_wifi = nullptr;
         esp_event_handler_instance_t event_handler_ip = nullptr;
         uint8_t m_try_count = 0;
+        esp_netif_ip_info_t m_ip_info;
     };
 
     wifi *wifi::sp_instance = nullptr;
@@ -228,6 +230,8 @@ namespace hardware
         {
             impl->save_config();
 
+            impl->m_flags.info_updated = true;
+
             break;
         }
 
@@ -239,6 +243,8 @@ namespace hardware
     static void ip_event_handler(void *arg, esp_event_base_t event_base,
                                  int32_t event_id, void *event_data)
     {
+        auto impl = static_cast<wifi_implementation *>(arg);
+
         switch (event_id)
         {
         case IP_EVENT_AP_STAIPASSIGNED:
@@ -252,9 +258,7 @@ namespace hardware
 
         case IP_EVENT_STA_GOT_IP:
         {
-            auto *event = static_cast<ip_event_got_ip_t *>(event_data);
-
-            ESP_LOGI(TAG, "assigned ip: " IPSTR, IP2STR(&event->ip_info.ip));
+            impl->m_flags.info_updated = true;
 
             break;
         }
@@ -316,6 +320,27 @@ namespace hardware
         return mp_implementation->m_password;
     }
 
+    const char *wifi::get_ip()
+    {
+        static char buffer[16] = {0};
+
+        return esp_ip4addr_ntoa(&mp_implementation->m_ip_info.ip, buffer, sizeof(buffer));
+    }
+
+    const char *wifi::get_netmask()
+    {
+        static char buffer[16] = {0};
+
+        return esp_ip4addr_ntoa(&mp_implementation->m_ip_info.netmask, buffer, sizeof(buffer));
+    }
+
+    const char *wifi::get_gateway()
+    {
+        static char buffer[16] = {0};
+
+        return esp_ip4addr_ntoa(&mp_implementation->m_ip_info.gw, buffer, sizeof(buffer));
+    }
+
     void wifi::poll()
     {
         if (mp_implementation->m_flags.should_restart)
@@ -323,6 +348,13 @@ namespace hardware
             mp_implementation->m_flags.should_restart = false;
 
             restart();
+        }
+
+        if (mp_implementation->m_flags.info_updated)
+        {
+            mp_implementation->m_flags.info_updated = false;
+
+            ESP_ERROR_CHECK(esp_netif_get_ip_info(mp_implementation->m_network_interface, &mp_implementation->m_ip_info));
         }
     }
 

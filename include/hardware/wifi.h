@@ -41,6 +41,10 @@ namespace hardware
         void set_password(const char *password);
         const char *get_password();
 
+        const char *get_ip();
+        const char *get_netmask();
+        const char *get_gateway();
+
         void poll();
         void restart();
 
