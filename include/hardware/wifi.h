@@ -9,6 +9,12 @@ namespace hardware
     class wifi
     {
     public:
+        enum class mode : uint8_t
+        {
+            ACCESS_POINT,
+            STATION,
+        };
+
         static wifi &get()
         {
             if (sp_instance)
@@ -26,11 +32,20 @@ namespace hardware
         wifi &operator=(const wifi &) = delete;
         wifi &operator=(wifi &&) = delete;
 
+        void set_mode(mode m);
+        mode get_mode();
+
+        void set_ssid(const char *ssid);
+        const char *get_ssid();
+
+        void set_password(const char *password);
+        const char *get_password();
+
     private:
         static wifi *sp_instance;
 
-        std::unique_ptr<wifi_implementation> mp_implementation;
-
         wifi();
+
+        std::unique_ptr<wifi_implementation> mp_implementation;
     };
 }
