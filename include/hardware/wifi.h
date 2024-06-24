@@ -41,10 +41,16 @@ namespace hardware
         void set_password(const char *password);
         const char *get_password();
 
+        void poll();
+        void restart();
+
     private:
         static wifi *sp_instance;
 
         wifi();
+
+        void start();
+        void stop();
 
         std::unique_ptr<wifi_implementation> mp_implementation;
     };

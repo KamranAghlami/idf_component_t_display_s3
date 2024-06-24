@@ -84,9 +84,9 @@ namespace hardware
 
         void save_config()
         {
-            if (m_config_changed)
+            if (m_flags.config_changed)
             {
-                m_config_changed = false;
+                m_flags.config_changed = false;
 
                 ESP_ERROR_CHECK(nvs_set_u8(m_nvs_handle, "mode", static_cast<uint8_t>(m_mode)));
                 ESP_ERROR_CHECK(nvs_set_str(m_nvs_handle, "ssid", m_ssid));
@@ -101,7 +101,7 @@ namespace hardware
         void set_mode(wifi::mode m)
         {
             m_mode = m;
-            m_config_changed = true;
+            m_flags.config_changed = true;
         }
 
         void set_ssid(const char *ssid)
@@ -115,7 +115,7 @@ namespace hardware
 
             strcpy(m_ssid, ssid);
 
-            m_config_changed = true;
+            m_flags.config_changed = true;
         }
 
         void set_password(const char *password)
@@ -132,16 +132,23 @@ namespace hardware
                 strcpy(m_password, password);
             }
 
-            m_config_changed = true;
+            m_flags.config_changed = true;
         }
+
+        struct
+        {
+            bool config_changed : 1;
+            bool should_restart : 1;
+        } m_flags = {};
 
         nvs_handle_t m_nvs_handle = 0;
         wifi::mode m_mode = wifi::mode::ACCESS_POINT;
         char *m_ssid = nullptr;
         char *m_password = nullptr;
         esp_netif_t *m_network_interface = nullptr;
+        esp_event_handler_instance_t event_handler_wifi = nullptr;
+        esp_event_handler_instance_t event_handler_ip = nullptr;
         uint8_t m_try_count = 0;
-        bool m_config_changed = false;
     };
 
     wifi *wifi::sp_instance = nullptr;
@@ -189,15 +196,14 @@ namespace hardware
 
             if (impl->m_try_count == 3)
             {
-                ESP_LOGE(TAG, "failed to connect to %s, switching to access point mode", event->ssid);
+                ESP_LOGW(TAG, "failed to connect to %s, switching to access point mode", event->ssid);
 
                 impl->set_mode(wifi::mode::ACCESS_POINT);
                 impl->set_ssid(AP_DEFAULT_SSID);
                 impl->set_password(AP_DEFAULT_PASS);
                 impl->save_config();
-                impl->m_try_count = 0;
 
-                esp_restart(); // shouldn't have to do this.
+                impl->m_flags.should_restart = true;
 
                 return;
             }
@@ -260,6 +266,74 @@ namespace hardware
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+        start();
+    }
+
+    wifi::~wifi()
+    {
+        stop();
+
+        ESP_ERROR_CHECK(esp_event_loop_delete_default());
+        ESP_ERROR_CHECK(esp_netif_deinit());
+
+        nvs_close(mp_implementation->m_nvs_handle);
+    }
+
+    void wifi::set_mode(mode m)
+    {
+        mp_implementation->set_mode(m);
+    }
+
+    wifi::mode wifi::get_mode()
+    {
+        return mp_implementation->m_mode;
+    }
+
+    void wifi::set_ssid(const char *ssid)
+    {
+        mp_implementation->set_ssid(ssid);
+    }
+
+    const char *wifi::get_ssid()
+    {
+        return mp_implementation->m_ssid;
+    }
+
+    void wifi::set_password(const char *password)
+    {
+        mp_implementation->set_password(password);
+    }
+
+    const char *wifi::get_password()
+    {
+        return mp_implementation->m_password;
+    }
+
+    void wifi::poll()
+    {
+        if (mp_implementation->m_flags.should_restart)
+        {
+            mp_implementation->m_flags.should_restart = false;
+
+            restart();
+        }
+    }
+
+    void wifi::restart()
+    {
+        stop();
+        start();
+    }
+
+    void wifi::start()
+    {
+        if (mp_implementation->m_network_interface)
+        {
+            ESP_LOGW(TAG, "subsystem is already started");
+
+            return;
+        }
+
         if (mp_implementation->m_mode == mode::ACCESS_POINT)
             mp_implementation->m_network_interface = esp_netif_create_default_wifi_ap();
         else
@@ -268,8 +342,8 @@ namespace hardware
         const wifi_init_config_t init_config = WIFI_INIT_CONFIG_DEFAULT();
 
         ESP_ERROR_CHECK(esp_wifi_init(&init_config));
-        ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, mp_implementation.get(), nullptr));
-        ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler, mp_implementation.get(), nullptr));
+        ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, mp_implementation.get(), &mp_implementation->event_handler_wifi));
+        ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler, mp_implementation.get(), &mp_implementation->event_handler_ip));
 
         wifi_config_t wifi_config = {};
 
@@ -311,45 +385,26 @@ namespace hardware
             ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
         }
 
+        mp_implementation->m_try_count = 0;
+
         ESP_ERROR_CHECK(esp_wifi_start());
     }
 
-    wifi::~wifi()
+    void wifi::stop()
     {
+        if (!mp_implementation->m_network_interface)
+        {
+            ESP_LOGW(TAG, "subsystem haven't been started");
+
+            return;
+        }
+
         ESP_ERROR_CHECK(esp_wifi_stop());
+        ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, ESP_EVENT_ANY_ID, mp_implementation->event_handler_ip));
+        ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, mp_implementation->event_handler_wifi));
+        ESP_ERROR_CHECK(esp_wifi_deinit());
         esp_netif_destroy_default_wifi(mp_implementation->m_network_interface);
-        ESP_ERROR_CHECK(esp_event_loop_delete_default());
-        ESP_ERROR_CHECK(esp_netif_deinit());
-        nvs_close(mp_implementation->m_nvs_handle);
-    }
 
-    void wifi::set_mode(mode m)
-    {
-        mp_implementation->set_mode(m);
-    }
-
-    wifi::mode wifi::get_mode()
-    {
-        return mp_implementation->m_mode;
-    }
-
-    void wifi::set_ssid(const char *ssid)
-    {
-        mp_implementation->set_ssid(ssid);
-    }
-
-    const char *wifi::get_ssid()
-    {
-        return mp_implementation->m_ssid;
-    }
-
-    void wifi::set_password(const char *password)
-    {
-        mp_implementation->set_password(password);
-    }
-
-    const char *wifi::get_password()
-    {
-        return mp_implementation->m_password;
+        mp_implementation->m_network_interface = nullptr;
     }
 }

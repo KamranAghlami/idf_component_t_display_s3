@@ -98,6 +98,8 @@ application::application() : m_is_running(true)
 
     auto on_update = [](lv_timer_t *timer)
     {
+        hardware::wifi::get().poll();
+
         static const auto app = static_cast<application *>(timer->user_data);
 
         auto now = esp_timer_get_time();
