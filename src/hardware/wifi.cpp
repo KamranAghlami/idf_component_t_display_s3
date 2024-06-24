@@ -224,6 +224,13 @@ namespace hardware
             break;
         }
 
+        case WIFI_EVENT_AP_START:
+        {
+            impl->save_config();
+
+            break;
+        }
+
         default:
             break;
         }
