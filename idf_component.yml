@@ -1,9 +1,5 @@
 dependencies:
   idf:
     version: ">=5.1.1"
-  espressif/esp_tinyusb:
-    version: "^1.4"
   esp_littlefs:
     git: https://github.com/joltwallet/esp_littlefs.git
-  lvgl:
-    git: https://github.com/KamranAghlami/idf_component_lvgl.git

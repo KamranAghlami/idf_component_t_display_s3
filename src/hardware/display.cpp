@@ -5,8 +5,6 @@
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
 
-#include <lvgl/lvgl.h>
-
 constexpr gpio_num_t PIN_LCD_BACKLIGHT = GPIO_NUM_38;
 constexpr gpio_num_t PIN_LCD_CS = GPIO_NUM_6;
 constexpr gpio_num_t PIN_LCD_D0 = GPIO_NUM_39;
@@ -25,6 +23,7 @@ constexpr gpio_num_t PIN_LCD_WR = GPIO_NUM_8;
 
 constexpr uint16_t LCD_PIXELS_WIDTH = 320;
 constexpr uint16_t LCD_PIXELS_HEIGHT = 170;
+constexpr uint8_t LCD_COLOR_SIZE = 2;
 
 namespace hardware
 {
@@ -69,7 +68,7 @@ namespace hardware
                     PIN_LCD_D7,
                 },
             .bus_width = 8,
-            .max_transfer_bytes = sizeof(lv_color_t) * LCD_PIXELS_WIDTH * 16,
+            .max_transfer_bytes = LCD_COLOR_SIZE * LCD_PIXELS_WIDTH * 16,
             .psram_trans_align = 32,
             .sram_trans_align = 4,
         };
@@ -102,7 +101,7 @@ namespace hardware
             .flags = {
                 .cs_active_high = 0,
                 .reverse_color_bits = 0,
-                .swap_color_bytes = !LV_COLOR_16_SWAP,
+                .swap_color_bytes = 0,
                 .pclk_active_neg = 0,
                 .pclk_idle_low = 0,
             },
